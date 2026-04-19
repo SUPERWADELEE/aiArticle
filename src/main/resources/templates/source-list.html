@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head}"></head>
+<body class="bg-slate-50 text-slate-900">
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="max-w-5xl mx-auto px-4 py-8">
+    <section class="mb-8">
+        <h1 class="text-3xl font-bold mb-2">
+            <span th:text="${@sourceNameMapper.display(source)}">Source</span> 文章
+        </h1>
+        <p class="text-slate-600" th:text="${pageDescription}">描述</p>
+    </section>
+
+    <section aria-label="文章列表">
+        <ul class="grid gap-4 sm:grid-cols-2">
+            <li th:each="article : ${articles}"
+                class="bg-white rounded-lg border border-slate-200 p-5 hover:shadow-md transition">
+                <article>
+                    <time th:if="${article.publishedAt}"
+                          th:datetime="${article.publishedAt}"
+                          class="text-xs text-slate-500"
+                          th:text="${#temporals.format(article.publishedAt, 'yyyy-MM-dd')}">date</time>
+                    <h2 class="text-lg font-semibold mb-2 mt-1 leading-snug">
+                        <a th:href="@{'/articles/' + ${article.id}}"
+                           th:text="${article.title}"
+                           class="hover:text-indigo-600">title</a>
+                    </h2>
+                    <p class="text-sm text-slate-700 line-clamp-3"
+                       th:text="${article.summary}">summary</p>
+                </article>
+            </li>
+        </ul>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

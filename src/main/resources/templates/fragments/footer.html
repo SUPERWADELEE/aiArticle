@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="footer" class="bg-white border-t border-slate-200 mt-20">
+    <div class="max-w-3xl mx-auto px-4 py-8 text-sm text-slate-500 text-center">
+        &copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2026</span>
+        <span th:text="${siteName}">AI Daily Digest</span>
+        <span class="mx-2">·</span>
+        <span>由 AI 自動摘要，資料僅供參考</span>
+    </div>
+</footer>
+</body>
+</html>

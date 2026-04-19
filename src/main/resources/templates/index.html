@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head}"></head>
+<body class="bg-slate-50 text-slate-900">
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="max-w-3xl mx-auto px-4 py-10">
+    <section class="mb-10 text-center">
+        <h1 class="text-4xl sm:text-5xl font-bold tracking-tight mb-3" th:text="${siteName}">AI Daily Digest</h1>
+        <p class="text-slate-600 text-lg leading-relaxed" th:text="${siteDescription}">每日 AI/LLM 技術文章中文摘要</p>
+    </section>
+
+    <section aria-label="文章列表">
+        <div th:if="${articles.isEmpty()}" class="text-center py-16 text-slate-500 bg-white border border-slate-200 rounded-xl">
+            目前尚無文章。
+        </div>
+
+        <!-- Featured: latest article -->
+        <article th:if="${!articles.isEmpty()}"
+                 th:with="first=${articles[0]}"
+                 class="bg-white rounded-2xl border border-slate-200 p-7 mb-6 hover:border-indigo-300 hover:shadow-lg transition">
+            <div class="flex items-center gap-3 text-xs mb-3">
+                <span class="bg-indigo-600 text-white px-2.5 py-1 rounded-full font-medium">今日精選</span>
+                <span class="bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-full"
+                      th:text="${@sourceNameMapper.display(first.source)}">source</span>
+                <time th:if="${first.publishedAt}"
+                      th:datetime="${first.publishedAt}"
+                      th:text="${#temporals.format(first.publishedAt, 'yyyy-MM-dd')}"
+                      class="text-slate-500">date</time>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-bold mb-4 leading-tight">
+                <a th:href="@{'/articles/' + ${first.id}}"
+                   th:text="${first.title}"
+                   class="hover:text-indigo-600">title</a>
+            </h2>
+            <p class="text-slate-700 leading-relaxed line-clamp-4 mb-4"
+               th:text="${first.summary}">summary</p>
+            <a th:href="@{'/articles/' + ${first.id}}"
+               class="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                閱讀摘要 →
+            </a>
+        </article>
+
+        <!-- Divider label -->
+        <h3 th:if="${articles.size() > 1}"
+            class="text-xs uppercase tracking-wider text-slate-500 font-semibold mt-10 mb-4 px-1">
+            更多文章
+        </h3>
+
+        <!-- Rest of articles -->
+        <ul class="space-y-4">
+            <li th:each="article, iter : ${articles}" th:if="${!iter.first}">
+                <article class="bg-white rounded-xl border border-slate-200 p-6 hover:border-indigo-300 hover:shadow-md transition">
+                    <div class="flex items-center gap-2 text-xs mb-2">
+                        <span class="bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-full"
+                              th:text="${@sourceNameMapper.display(article.source)}">source</span>
+                        <time th:if="${article.publishedAt}"
+                              th:datetime="${article.publishedAt}"
+                              th:text="${#temporals.format(article.publishedAt, 'yyyy-MM-dd')}"
+                              class="text-slate-500">date</time>
+                    </div>
+                    <h2 class="text-lg sm:text-xl font-semibold mb-2 leading-snug">
+                        <a th:href="@{'/articles/' + ${article.id}}"
+                           th:text="${article.title}"
+                           class="hover:text-indigo-600">title</a>
+                    </h2>
+                    <p class="text-sm text-slate-700 leading-relaxed line-clamp-3"
+                       th:text="${article.summary}">summary</p>
+                </article>
+            </li>
+        </ul>
+
+        <nav th:if="${totalPages > 1}" aria-label="分頁" class="flex justify-center items-center gap-2 mt-10">
+            <a th:if="${currentPage > 0}"
+               th:href="@{/(page=${currentPage - 1})}"
+               class="px-4 py-2 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 text-sm font-medium">← 上一頁</a>
+            <span class="px-4 py-2 text-slate-600 text-sm">
+                <span th:text="${currentPage + 1}">1</span> / <span th:text="${totalPages}">1</span>
+            </span>
+            <a th:if="${currentPage + 1 < totalPages}"
+               th:href="@{/(page=${currentPage + 1})}"
+               class="px-4 py-2 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 text-sm font-medium">下一頁 →</a>
+        </nav>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>
