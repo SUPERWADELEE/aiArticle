@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head}"></head>
+<body class="bg-slate-50 text-slate-900">
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="max-w-3xl mx-auto px-4 py-8">
+    <article>
+        <header class="mb-6">
+            <div class="flex items-center gap-2 text-sm text-slate-500 mb-3">
+                <a th:href="@{/sources/{src}(src=${article.source})}"
+                   class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded hover:bg-indigo-100"
+                   th:text="${@sourceNameMapper.display(article.source)}">source</a>
+                <time th:if="${article.publishedAt}"
+                      th:datetime="${article.publishedAt}"
+                      th:text="${#temporals.format(article.publishedAt, 'yyyy-MM-dd HH:mm')}">date</time>
+            </div>
+            <h1 class="text-3xl font-bold leading-tight mb-2" th:text="${article.title}">Title</h1>
+            <p class="text-base text-slate-600">
+                by <span class="font-semibold text-slate-900"
+                         th:text="${@authorLookup.displayWithTitle(article)}">作者</span>
+            </p>
+        </header>
+
+        <section aria-label="中文摘要" class="prose prose-slate max-w-none mb-8">
+            <h2 class="text-xl font-semibold mb-3">中文摘要</h2>
+            <p class="whitespace-pre-line text-slate-800 leading-relaxed"
+               th:text="${article.summary}">summary</p>
+        </section>
+
+
+        <footer class="border-t border-slate-200 pt-6">
+            <a th:href="${article.url}" target="_blank" rel="noopener"
+               class="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium">
+                閱讀原文 →
+            </a>
+        </footer>
+    </article>
+
+    <nav aria-label="返回" class="mt-8">
+        <a href="/" class="text-sm text-slate-600 hover:text-indigo-600">← 回到文章列表</a>
+    </nav>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

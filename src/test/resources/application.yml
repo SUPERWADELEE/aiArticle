@@ -1,0 +1,42 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+
+app:
+  groq:
+    api-key: test-key
+    model: llama-3.3-70b-versatile
+    url: https://api.groq.com/openai/v1/chat/completions
+  telegram:
+    bot-token: test-token
+    chat-id: test-chat
+    url: https://api.telegram.org
+  rss:
+    sources:
+      - https://example.com/feed.xml
+  trending-ai:
+    enabled: false
+    results-per-query: 5
+    queries: []
+  author-tracker:
+    enabled: false
+    cse-api-key: ""
+    cse-id: ""
+    lookback-hours: 48
+    handles: []
+  keywords:
+    - claude
+    - llm
+    - gpt
+    - gemini
+    - ai agent
+    - rag
+    - fine-tune
+    - vector
+    - embedding
+    - mcp
