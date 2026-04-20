@@ -69,6 +69,59 @@ public class TelegramService {
         return sb.toString().trim();
     }
 
+    public void sendAuthorActivityReport(AuthorActivityTracker.Report report) {
+        if (botToken == null || botToken.isBlank() || chatId == null || chatId.isBlank()) {
+            log.warn("Telegram not configured, skipping author activity report");
+            return;
+        }
+
+        String message = formatAuthorReport(report);
+        List<String> chunks = splitMessage(message);
+        for (String chunk : chunks) {
+            sendMessage(chunk);
+        }
+        log.info("Sent author activity report: {}/{} authors active, {} message(s)",
+                report.authorsWithActivity(), report.totalAuthors(), chunks.size());
+    }
+
+    String formatAuthorReport(AuthorActivityTracker.Report report) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("*\uD83D\uDC26 今日 X 動態追蹤* （")
+                .append(report.authorsWithActivity()).append("/").append(report.totalAuthors())
+                .append(" 位作者有新活動）\n\n");
+
+        if (report.authorsWithActivity() == 0) {
+            sb.append("今天沒人有可追蹤的新活動。");
+            return sb.toString();
+        }
+
+        for (AuthorActivityTracker.AuthorActivity activity : report.details()) {
+            if (activity.findings().isEmpty()) continue;
+
+            sb.append("*").append(escapeMarkdown(activity.name())).append("*");
+            if (activity.title() != null && !activity.title().isBlank()) {
+                sb.append(" _(").append(escapeMarkdown(activity.title())).append(")_");
+            }
+            sb.append("\n");
+
+            List<GoogleCseSearchService.SearchResult> findings = activity.findings();
+            for (int i = 0; i < findings.size(); i++) {
+                GoogleCseSearchService.SearchResult r = findings.get(i);
+                String prefix = (i == findings.size() - 1) ? "└─ " : "├─ ";
+                sb.append(prefix).append(escapeMarkdown(truncate(r.title(), 80))).append("\n");
+                sb.append("   ").append(r.link()).append("\n");
+            }
+            sb.append("\n");
+        }
+
+        return sb.toString().trim();
+    }
+
+    private static String truncate(String s, int max) {
+        if (s == null) return "";
+        return s.length() <= max ? s : s.substring(0, max - 1) + "…";
+    }
+
     List<String> splitMessage(String message) {
         List<String> chunks = new ArrayList<>();
         if (message.length() <= MAX_MESSAGE_LENGTH) {
