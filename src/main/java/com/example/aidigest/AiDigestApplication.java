@@ -1,6 +1,7 @@
 package com.example.aidigest;
 
 import com.example.aidigest.config.AppProperties;
+import com.example.aidigest.config.AuthorTrackerProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -10,7 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @EnableAsync
-@EnableConfigurationProperties(AppProperties.class)
+@EnableConfigurationProperties({AppProperties.class, AuthorTrackerProperties.class})
 public class AiDigestApplication {
 
     public static void main(String[] args) {

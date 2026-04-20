@@ -2,6 +2,7 @@ package com.example.aidigest.service;
 
 import com.example.aidigest.config.AppProperties;
 import com.example.aidigest.model.Article;
+import com.example.aidigest.util.AuthorLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -19,12 +20,14 @@ public class TelegramService {
     private static final int MAX_MESSAGE_LENGTH = 4096;
 
     private final RestClient restClient;
+    private final AuthorLookupService authorLookup;
     private final String botToken;
     private final String chatId;
     private final String baseUrl;
 
-    public TelegramService(RestClient restClient, AppProperties appProperties) {
+    public TelegramService(RestClient restClient, AuthorLookupService authorLookup, AppProperties appProperties) {
         this.restClient = restClient;
+        this.authorLookup = authorLookup;
         this.botToken = appProperties.telegram().botToken();
         this.chatId = appProperties.telegram().chatId();
         this.baseUrl = appProperties.telegram().url();
@@ -58,6 +61,7 @@ public class TelegramService {
         for (int i = 0; i < articles.size(); i++) {
             Article article = articles.get(i);
             sb.append("*").append(i + 1).append(". ").append(escapeMarkdown(article.getTitle())).append("*\n");
+            sb.append("\u270D\uFE0F _by ").append(escapeMarkdown(authorLookup.displayWithTitle(article))).append("_\n");
             sb.append(escapeMarkdown(article.getSummary())).append("\n");
             sb.append("[閱讀原文](").append(article.getUrl()).append(")\n\n");
         }

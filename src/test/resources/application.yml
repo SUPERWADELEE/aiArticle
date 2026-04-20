@@ -19,6 +19,12 @@ app:
   rss:
     sources:
       - https://example.com/feed.xml
+  author-tracker:
+    enabled: false
+    cse-api-key: ""
+    cse-id: ""
+    lookback-hours: 48
+    handles: []
   keywords:
     - claude
     - llm

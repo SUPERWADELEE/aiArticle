@@ -17,6 +17,51 @@ app:
   indexnow:
     enabled: ${INDEXNOW_ENABLED:false}
     key: ${INDEXNOW_KEY:}
+  author-tracker:
+    enabled: ${AUTHOR_TRACKER_ENABLED:false}
+    cse-api-key: ${GOOGLE_CSE_API_KEY:}
+    cse-id: ${GOOGLE_CSE_ID:}
+    lookback-hours: 48
+    handles:
+      - { handle: karpathy, name: "Andrej Karpathy", title: "OpenAI 共同創辦人、LLM 教育者" }
+      - { handle: simonw, name: "Simon Willison", title: "Django 共同創辦人、LLM 實戰部落客" }
+      - { handle: thdx, name: "thdx", title: "opencode 創造者" }
+      - { handle: rauchg, name: "Guillermo Rauch", title: "Vercel CEO、Next.js 作者" }
+      - { handle: mitchellh, name: "Mitchell Hashimoto", title: "HashiCorp 共同創辦人、Ghostty 作者" }
+      - { handle: dhh, name: "DHH", title: "Ruby on Rails 作者、37signals CTO" }
+      - { handle: addyosmani, name: "Addy Osmani", title: "Google Cloud AI director" }
+      - { handle: zeeg, name: "David Cramer", title: "Sentry 共同創辦人" }
+      - { handle: jarredsumner, name: "Jarred Sumner", title: "Bun 創造者、Oven CEO" }
+      - { handle: BHolmesDev, name: "Ben Holmes", title: "Astro 核心團隊" }
+      - { handle: boristane, name: "Boris Tane", title: "Baselime 創辦人、前 Cloudflare Workers" }
+      - { handle: karrisaarinen, name: "Karri Saarinen", title: "Linear 共同創辦人兼 CEO" }
+      - { handle: kepano, name: "Stephan Ango", title: "Obsidian CEO" }
+      - { handle: trq212, name: "trq212", title: "Claude Code 更新資訊" }
+      - { handle: bcherny, name: "Boris Cherny", title: "Claude Code 創造者 @ Anthropic" }
+      - { handle: lennysan, name: "Lenny Rachitsky", title: "Lenny's Newsletter、前 Airbnb PM" }
+      - { handle: jasonfried, name: "Jason Fried", title: "37signals/Basecamp CEO" }
+      - { handle: leerob, name: "Lee Robinson", title: "Cursor 團隊、前 Vercel VP" }
+      - { handle: ctatedev, name: "Chris Tate", title: "Vercel Labs" }
+      - { handle: Shpigford, name: "Josh Pigford", title: "Indie Maker、Baremetrics / Maybe Finance" }
+      - { handle: shadcn, name: "shadcn", title: "shadcn/ui 作者 @ Vercel" }
+      - { handle: emilkowalski, name: "Emil Kowalski", title: "Sonner / Vaul 作者" }
+      - { handle: joshpuckett, name: "Josh Puckett", title: "Design Engineer (interfacecraft.dev)" }
+      - { handle: jakubkrehel, name: "Jakub Krehel", title: "Design Engineer (jakub.kr)" }
+      - { handle: raphaelsalaja, name: "Raphael Salaja", title: "userinterface.wiki 經營者" }
+      - { handle: nandafyi, name: "nandafyi", title: "Cloudflare 設計師" }
+      - { handle: benjitaylor, name: "Benji Taylor", title: "Agentation、前 Twitter 設計師" }
+      - { handle: mengto, name: "Meng To", title: "Design+Code、Aura Build 創辦人" }
+      - { handle: jayneildalal, name: "Jayneil Dalal", title: "設計師專訪" }
+      - { handle: jh3yy, name: "Jhey Tompkins", title: "CSS/動畫魔術師 @ Vercel" }
+      - { handle: GergelyOrosz, name: "Gergely Orosz", title: "The Pragmatic Engineer" }
+      - { handle: theo, name: "Theo Browne", title: "t3.gg、Ping.gg 創辦人" }
+      - { handle: ThePrimeagen, name: "ThePrimeagen", title: "前 Netflix、Twitch 直播主" }
+      - { handle: Rasmic, name: "Rasmus Andersson", title: "前端/全端教學 YouTuber" }
+      - { handle: atmoio, name: "atmoio", title: "基礎設施/DevOps 內容" }
+      - { handle: jamwt, name: "Jamie Turner", title: "Convex CEO、前 Dropbox" }
+      - { handle: jamesacowling, name: "James Cowling", title: "Convex CTO、前 Dropbox Magic Pocket" }
+      - { handle: glcst, name: "Glauber Costa", title: "Turso CEO、ex-ScyllaDB" }
+      - { handle: samlambert, name: "Sam Lambert", title: "PlanetScale CEO、ex-GitHub" }
   groq:
     api-key: ${GROQ_API_KEY:}
     model: llama-3.3-70b-versatile

@@ -28,11 +28,15 @@
                       th:text="${#temporals.format(first.publishedAt, 'yyyy-MM-dd')}"
                       class="text-slate-500">date</time>
             </div>
-            <h2 class="text-2xl sm:text-3xl font-bold mb-4 leading-tight">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-2 leading-tight">
                 <a th:href="@{'/articles/' + ${first.id}}"
                    th:text="${first.title}"
                    class="hover:text-indigo-600">title</a>
             </h2>
+            <p class="text-sm text-slate-500 mb-4">
+                by <span class="font-semibold text-slate-800"
+                         th:text="${@authorLookup.displayWithTitle(first)}">作者</span>
+            </p>
             <p class="text-slate-700 leading-relaxed line-clamp-4 mb-4"
                th:text="${first.summary}">summary</p>
             <a th:href="@{'/articles/' + ${first.id}}"
@@ -59,11 +63,15 @@
                               th:text="${#temporals.format(article.publishedAt, 'yyyy-MM-dd')}"
                               class="text-slate-500">date</time>
                     </div>
-                    <h2 class="text-lg sm:text-xl font-semibold mb-2 leading-snug">
+                    <h2 class="text-lg sm:text-xl font-semibold mb-1 leading-snug">
                         <a th:href="@{'/articles/' + ${article.id}}"
                            th:text="${article.title}"
                            class="hover:text-indigo-600">title</a>
                     </h2>
+                    <p class="text-xs text-slate-500 mb-2">
+                        by <span class="font-medium text-slate-700"
+                                 th:text="${@authorLookup.displayWithTitle(article)}">作者</span>
+                    </p>
                     <p class="text-sm text-slate-700 leading-relaxed line-clamp-3"
                        th:text="${article.summary}">summary</p>
                 </article>

@@ -15,7 +15,11 @@
                       th:datetime="${article.publishedAt}"
                       th:text="${#temporals.format(article.publishedAt, 'yyyy-MM-dd HH:mm')}">date</time>
             </div>
-            <h1 class="text-3xl font-bold leading-tight mb-3" th:text="${article.title}">Title</h1>
+            <h1 class="text-3xl font-bold leading-tight mb-2" th:text="${article.title}">Title</h1>
+            <p class="text-base text-slate-600">
+                by <span class="font-semibold text-slate-900"
+                         th:text="${@authorLookup.displayWithTitle(article)}">作者</span>
+            </p>
         </header>
 
         <section aria-label="中文摘要" class="prose prose-slate max-w-none mb-8">
