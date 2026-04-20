@@ -7,6 +7,7 @@ public record ArticleDto(
         String title,
         String url,
         String source,
+        String author,
         String summary,
         Instant publishedAt,
         Instant createdAt
@@ -17,6 +18,7 @@ public record ArticleDto(
                 article.getTitle(),
                 article.getUrl(),
                 article.getSource(),
+                article.getAuthor(),
                 article.getSummary(),
                 article.getPublishedAt(),
                 article.getCreatedAt()

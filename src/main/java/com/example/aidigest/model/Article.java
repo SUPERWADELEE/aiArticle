@@ -20,6 +20,9 @@ public class Article {
     @Column(nullable = false)
     private String source;
 
+    @Column
+    private String author;
+
     @Column(columnDefinition = "TEXT")
     private String content;
 
@@ -39,9 +42,14 @@ public class Article {
     public Article() {}
 
     public Article(String title, String url, String source, String content, Instant publishedAt) {
+        this(title, url, source, null, content, publishedAt);
+    }
+
+    public Article(String title, String url, String source, String author, String content, Instant publishedAt) {
         this.title = title;
         this.url = url;
         this.source = source;
+        this.author = author;
         this.content = content;
         this.publishedAt = publishedAt;
     }
@@ -56,6 +64,9 @@ public class Article {
 
     public String getSource() { return source; }
     public void setSource(String source) { this.source = source; }
+
+    public String getAuthor() { return author; }
+    public void setAuthor(String author) { this.author = author; }
 
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }

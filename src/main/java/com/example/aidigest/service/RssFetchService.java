@@ -3,6 +3,7 @@ package com.example.aidigest.service;
 import com.example.aidigest.model.Article;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
+import com.rometools.rome.feed.synd.SyndPerson;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
 import org.slf4j.Logger;
@@ -33,16 +34,16 @@ public class RssFetchService {
         this.sources = appProperties.rss().sources();
     }
 
-    public record SourceOutcome(List<Article> articles, String error) {
-        static SourceOutcome ok(List<Article> articles) {
-            return new SourceOutcome(articles, null);
+    public record SourceOutcome(String sourceUrl, List<Article> articles, String error) {
+        static SourceOutcome ok(String url, List<Article> articles) {
+            return new SourceOutcome(url, articles, null);
         }
-        static SourceOutcome fail(String error) {
-            return new SourceOutcome(List.of(), error);
+        static SourceOutcome fail(String url, String error) {
+            return new SourceOutcome(url, List.of(), error);
         }
     }
 
-    public record FetchResult(List<Article> articles, List<String> errors) {}
+    public record FetchResult(List<Article> articles, List<String> errors, List<SourceOutcome> outcomes) {}
 
     public List<Article> fetchAll() {
         return fetchAllWithErrors().articles();
@@ -55,16 +56,16 @@ public class RssFetchService {
 
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
+        List<SourceOutcome> outcomes = futures.stream().map(CompletableFuture::join).toList();
         List<Article> all = new ArrayList<>();
         List<String> errors = new ArrayList<>();
-        for (int i = 0; i < futures.size(); i++) {
-            SourceOutcome outcome = futures.get(i).join();
+        for (SourceOutcome outcome : outcomes) {
             all.addAll(outcome.articles());
             if (outcome.error() != null) {
-                errors.add(sources.get(i) + " → " + outcome.error());
+                errors.add(outcome.sourceUrl() + " → " + outcome.error());
             }
         }
-        return new FetchResult(all, errors);
+        return new FetchResult(all, errors, outcomes);
     }
 
     SourceOutcome fetchSource(String sourceUrl) {
@@ -72,6 +73,7 @@ public class RssFetchService {
             SyndFeedInput input = new SyndFeedInput();
             SyndFeed feed = input.build(new XmlReader(URI.create(sourceUrl).toURL()));
             String sourceName = feed.getTitle() != null ? feed.getTitle() : sourceUrl;
+            String feedAuthor = firstNonBlank(feed.getAuthor(), firstPersonName(feed.getAuthors()));
 
             List<Article> articles = new ArrayList<>();
             for (SyndEntry entry : feed.getEntries()) {
@@ -90,14 +92,35 @@ public class RssFetchService {
                         ? entry.getPublishedDate().toInstant()
                         : Instant.now();
 
-                articles.add(new Article(title, link, sourceName, content, publishedAt));
+                String author = firstNonBlank(
+                        entry.getAuthor(),
+                        firstPersonName(entry.getAuthors()),
+                        feedAuthor
+                );
+
+                articles.add(new Article(title, link, sourceName, author, content, publishedAt));
             }
 
             log.info("Fetched {} articles from {}", articles.size(), sourceName);
-            return SourceOutcome.ok(articles);
+            return SourceOutcome.ok(sourceUrl, articles);
         } catch (Exception e) {
             log.error("Failed to fetch RSS from {}: {}", sourceUrl, e.getMessage());
-            return SourceOutcome.fail(e.getClass().getSimpleName() + ": " + e.getMessage());
+            return SourceOutcome.fail(sourceUrl, e.getClass().getSimpleName() + ": " + e.getMessage());
         }
+    }
+
+    private static String firstNonBlank(String... values) {
+        for (String v : values) {
+            if (v != null && !v.isBlank()) return v;
+        }
+        return null;
+    }
+
+    private static String firstPersonName(List<SyndPerson> persons) {
+        if (persons == null || persons.isEmpty()) return null;
+        for (SyndPerson p : persons) {
+            if (p != null && p.getName() != null && !p.getName().isBlank()) return p.getName();
+        }
+        return null;
     }
 }
