@@ -12,7 +12,7 @@ services:
   app:
     build: .
     ports:
-      - "8080:8080"
+      - "80:8080"
     depends_on:
       - db
     environment:
@@ -21,14 +21,13 @@ services:
       DB_NAME: aidigest
       DB_USER: postgres
       DB_PASSWORD: postgres
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
-      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
       GROQ_API_KEY: ${GROQ_API_KEY:-}
       GOOGLE_CSE_API_KEY: ${GOOGLE_CSE_API_KEY:-}
       GOOGLE_CSE_ID: ${GOOGLE_CSE_ID:-}
       AUTHOR_TRACKER_ENABLED: ${AUTHOR_TRACKER_ENABLED:-false}
-      APP_SITE_URL: ${APP_SITE_URL:-http://136.111.138.221:8080}
+      APP_SITE_URL: ${APP_SITE_URL:-http://136.111.138.221}
     restart: unless-stopped
 
 volumes:
