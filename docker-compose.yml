@@ -12,6 +12,7 @@ services:
     restart: unless-stopped
 
   app:
+    image: ghcr.io/superwadelee/ai-digest:latest
     build: .
     ports:
       - "127.0.0.1:8080:8080"
