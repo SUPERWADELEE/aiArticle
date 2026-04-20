@@ -17,6 +17,15 @@ app:
   indexnow:
     enabled: ${INDEXNOW_ENABLED:false}
     key: ${INDEXNOW_KEY:}
+  trending-ai:
+    enabled: ${TRENDING_AI_ENABLED:true}
+    results-per-query: 5
+    queries:
+      - "LLM OR \"large language model\" announcement"
+      - "\"AI agent\" OR \"agentic AI\""
+      - "GPT-5 OR Claude OR Gemini release"
+      - "\"open source LLM\" OR \"open weights\""
+      - "AI research paper"
   author-tracker:
     enabled: ${AUTHOR_TRACKER_ENABLED:false}
     cse-api-key: ${GOOGLE_CSE_API_KEY:}
@@ -73,7 +82,6 @@ app:
   rss:
     sources:
       - https://hnrss.org/newest?q=AI+LLM+claude+chatgpt&count=20
-      - https://dev.to/feed/tag/ai
       - https://www.anthropic.com/rss.xml
       - https://openai.com/blog/rss.xml
       - https://karpathy.github.io/feed.xml

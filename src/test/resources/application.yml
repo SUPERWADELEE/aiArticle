@@ -19,6 +19,10 @@ app:
   rss:
     sources:
       - https://example.com/feed.xml
+  trending-ai:
+    enabled: false
+    results-per-query: 5
+    queries: []
   author-tracker:
     enabled: false
     cse-api-key: ""

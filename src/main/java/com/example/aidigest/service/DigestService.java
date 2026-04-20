@@ -5,6 +5,7 @@ import com.example.aidigest.model.CrawlLog;
 import com.example.aidigest.model.CrawlStatus;
 import com.example.aidigest.repository.ArticleRepository;
 import com.example.aidigest.repository.CrawlLogRepository;
+import com.example.aidigest.util.AuthorLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,7 @@ import java.io.StringWriter;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -23,33 +25,40 @@ public class DigestService {
     private static final Logger log = LoggerFactory.getLogger(DigestService.class);
     private static final int MAX_ARTICLES_PER_RUN = 15;
     private static final long API_DELAY_MS = 4000;
+    private static final int MAX_ARTICLE_AGE_DAYS = 14;
     private static final String FAILED_SUMMARY_MARKER = "摘要生成失敗";
     private static final int ERROR_MESSAGE_MAX_CHARS = 2000;
 
     private final RssFetchService rssFetchService;
+    private final TrendingAiFetcher trendingAiFetcher;
     private final KeywordFilterService keywordFilterService;
     private final GroqSummaryService groqSummaryService;
     private final TelegramService telegramService;
     private final ArticleRepository articleRepository;
     private final CrawlLogRepository crawlLogRepository;
     private final IndexNowService indexNowService;
+    private final AuthorLookupService authorLookup;
     private final String siteUrl;
 
     public DigestService(RssFetchService rssFetchService,
+                         TrendingAiFetcher trendingAiFetcher,
                          KeywordFilterService keywordFilterService,
                          GroqSummaryService groqSummaryService,
                          TelegramService telegramService,
                          ArticleRepository articleRepository,
                          CrawlLogRepository crawlLogRepository,
                          IndexNowService indexNowService,
+                         AuthorLookupService authorLookup,
                          @Value("${app.site-url}") String siteUrl) {
         this.rssFetchService = rssFetchService;
+        this.trendingAiFetcher = trendingAiFetcher;
         this.keywordFilterService = keywordFilterService;
         this.groqSummaryService = groqSummaryService;
         this.telegramService = telegramService;
         this.articleRepository = articleRepository;
         this.crawlLogRepository = crawlLogRepository;
         this.indexNowService = indexNowService;
+        this.authorLookup = authorLookup;
         this.siteUrl = siteUrl;
     }
 
@@ -68,20 +77,36 @@ public class DigestService {
 
         try {
             RssFetchService.FetchResult fetchResult = rssFetchService.fetchAllWithErrors();
-            List<Article> fetched = fetchResult.articles();
+            List<Article> rssArticles = fetchResult.articles();
+            log.info("Fetched {} RSS articles ({} source errors)", rssArticles.size(), fetchResult.errors().size());
+
+            List<Article> trending = trendingAiFetcher.fetchTrending();
+            log.info("Fetched {} trending AI articles from Google CSE", trending.size());
+
+            List<Article> fetched = new ArrayList<>(rssArticles.size() + trending.size());
+            fetched.addAll(rssArticles);
+            fetched.addAll(trending);
             entry.setFetchedCount(fetched.size());
             entry.setSourceErrors(fetchResult.errors().isEmpty() ? null : String.join("\n", fetchResult.errors()));
-            log.info("Fetched {} articles ({} source errors)", fetched.size(), fetchResult.errors().size());
 
             List<Article> filtered = keywordFilterService.filter(fetched);
             entry.setFilteredCount(filtered.size());
             log.info("After keyword filter: {} articles", filtered.size());
 
-            List<Article> newArticles = filtered.stream()
+            Instant ageCutoff = Instant.now().minus(Duration.ofDays(MAX_ARTICLE_AGE_DAYS));
+            List<Article> fresh = filtered.stream()
+                    .filter(a -> a.getPublishedAt() != null && a.getPublishedAt().isAfter(ageCutoff))
+                    .toList();
+            log.info("After freshness filter ({}d): {} articles", MAX_ARTICLE_AGE_DAYS, fresh.size());
+
+            List<Article> newArticles = fresh.stream()
                     .filter(a -> !articleRepository.existsByUrl(a.getUrl()))
+                    .sorted(Comparator.comparing((Article a) -> authorLookup.find(a).isEmpty())
+                            .thenComparing(a -> a.getPublishedAt() == null ? Instant.EPOCH : a.getPublishedAt(),
+                                    Comparator.reverseOrder()))
                     .toList();
             entry.setNewCount(newArticles.size());
-            log.info("After deduplication: {} new articles", newArticles.size());
+            log.info("After dedup + priority sort: {} new articles", newArticles.size());
 
             if (newArticles.isEmpty()) {
                 entry.setSavedCount(0);
