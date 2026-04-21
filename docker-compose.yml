@@ -31,6 +31,7 @@ services:
       GOOGLE_CSE_ID: ${GOOGLE_CSE_ID:-}
       AUTHOR_TRACKER_ENABLED: ${AUTHOR_TRACKER_ENABLED:-false}
       APP_SITE_URL: ${APP_SITE_URL:-https://ai-article.elitecombat.dev}
+      TZ: Asia/Taipei
     restart: unless-stopped
 
 volumes:
