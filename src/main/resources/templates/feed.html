@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/matrix-base :: head}"></head>
+<body class="bg-[#0D0D0D] text-[#00FF41]">
+<div th:replace="~{fragments/matrix-header :: header}"></div>
+
+<!-- Hero -->
+<section class="bg-[#050505] h-[200px] flex flex-col justify-center items-center gap-1 overflow-hidden"
+         style="font-family:'Space Mono',monospace;">
+    <p class="text-[11px] text-[#0A2A0A] text-center w-full">01001000 10100110 &gt;&gt; AI_FEED v2.4.1 &lt;&lt; 11010101 01110010 &gt;&gt; SCRAPING_ACTIVE &lt;&lt; 10110011 01001101 10010110</p>
+    <p class="text-[11px] text-[#1A4A1A] text-center w-full">&gt;&gt;&gt; PROCESSING <span th:text="${feedStats.totalArticles}">0</span> ARTICLES | SOURCE: [TECHCRUNCH|ARXIV|OPENAI|GOOGLE_DEEPMIND] | STATUS: [ONLINE] &gt;&gt;&gt;</p>
+    <div class="flex flex-col items-center py-3 gap-2">
+        <h1 class="text-[28px] font-bold text-[#00FF41] matrix-glow">&gt; INITIALIZING AI_FEED...</h1>
+        <p class="text-[14px] text-[#2A6A2A]">// scraping intelligence from the minds that shape tomorrow</p>
+    </div>
+    <p class="text-[11px] text-[#1A4A1A] text-center w-full">
+        &gt;&gt;&gt; LAST_SYNC: <span th:text="${feedStats.lastSync}">--:-- UTC</span>
+        | ARTICLES_FETCHED: <span th:text="${feedStats.totalArticles}">0</span>
+        | AUTHORS_TRACKED: <span th:text="${feedStats.authorsTracked}">0</span>
+        | UPTIME: 99.97% &gt;&gt;&gt;
+    </p>
+    <p class="text-[11px] text-[#0A2A0A] text-center w-full">10110100 01101001 &gt;&gt; DATA_STREAM_ACTIVE &lt;&lt; 11001010 10100011 &gt;&gt; NEURAL_PARSE_ENGINE &lt;&lt; 01110101 10011010</p>
+</section>
+
+<!-- Filter bar (visual only) -->
+<section class="bg-[#070707] h-14 px-8 border-b border-[#1A4A1A] flex items-center gap-3"
+         style="font-family:'Space Mono',monospace;"
+         aria-label="篩選列（視覺示意）">
+    <span class="text-[16px] font-bold text-[#00FF41]">$</span>
+    <div class="flex items-center gap-2 px-3.5 h-9 w-[360px] rounded-sm bg-[#0A0A0A] border border-[#00FF41]">
+        <span class="text-[13px] text-[#1A5A1A]">filter --author='*' --tag='*'</span>
+        <span class="inline-block w-2 h-3.5 bg-[#00FF41] matrix-cursor"></span>
+    </div>
+    <div class="flex-1"></div>
+    <div class="flex items-center gap-2 text-[11px]">
+        <a href="#" aria-disabled="true" class="px-3 py-1 rounded-sm bg-[#001500] border border-[#00FF41] text-[#00FF41]">all</a>
+        <a href="#" aria-disabled="true" class="px-3 py-1 rounded-sm bg-[#050505] border border-[#1A4A1A] text-[#3A7A3A]">llm</a>
+        <a href="#" aria-disabled="true" class="px-3 py-1 rounded-sm bg-[#050505] border border-[#1A4A1A] text-[#3A7A3A]">agents</a>
+        <a href="#" aria-disabled="true" class="px-3 py-1 rounded-sm bg-[#050505] border border-[#1A4A1A] text-[#3A7A3A]">vision</a>
+        <a href="#" aria-disabled="true" class="px-3 py-1 rounded-sm bg-[#050505] border border-[#1A4A1A] text-[#3A7A3A]">research</a>
+    </div>
+</section>
+
+<!-- Content -->
+<main class="flex" style="font-family:'Space Mono',monospace;">
+
+    <!-- Article List -->
+    <section class="flex-1 px-8 py-6 flex flex-col gap-4" aria-label="文章列表">
+        <div th:if="${articles.isEmpty()}"
+             class="text-center py-16 text-[#2A6A2A] border border-[#1A4A1A] rounded">
+            $ no articles found
+        </div>
+
+        <article th:each="article : ${articles}"
+                 class="rounded bg-[#080808] border border-[#1A4A1A] p-5 flex flex-col gap-2.5 hover:border-[#00FF41] transition">
+            <!-- Top: source / date / NEW badge -->
+            <div class="flex items-center gap-2 w-full">
+                <span class="px-2 py-0.5 rounded-sm bg-[#001200] border border-[#00FF41] text-[11px] font-bold text-[#00FF41]"
+                      th:text="'[' + ${#strings.toUpperCase(@sourceNameMapper.display(article.source))} + ']'">[SOURCE]</span>
+                <time th:if="${article.publishedAt}"
+                      th:datetime="${article.publishedAt}"
+                      class="text-[11px] text-[#1A5A1A]"
+                      th:text="${#temporals.format(article.publishedAt, 'yyyy-MM-dd  HH:mm')} + ' UTC'">2026-04-21  08:32 UTC</time>
+                <span class="flex-1"></span>
+                <span th:if="${article.publishedAt != null and article.publishedAt.isAfter(recentThreshold)}"
+                      class="px-2 py-0.5 rounded-sm bg-[#002A00] text-[10px] font-bold text-[#00FF41]">● NEW</span>
+            </div>
+
+            <h2 class="text-[16px] font-bold text-[#00FF41] leading-snug">
+                <a th:href="@{'/articles/' + ${article.id}}"
+                   th:text="${article.title}"
+                   class="hover:underline matrix-glow">title</a>
+            </h2>
+
+            <p class="text-[13px] text-[#3A7A3A] leading-relaxed line-clamp-3"
+               th:text="'// ' + ${article.summary}">summary</p>
+
+            <div class="flex items-center gap-3 pt-1.5">
+                <span class="px-2.5 py-1 rounded-sm bg-[#0A1A0A] border border-[#2A6A2A] text-[12px] text-[#00CC33]"
+                      th:text="'// ' + ${@authorLookup.displayWithTitle(article)}">// author</span>
+                <span class="flex-1"></span>
+                <a th:href="@{'/articles/' + ${article.id}}"
+                   class="text-[12px] text-[#1A5A1A] hover:text-[#00FF41]">&gt;&gt; read_article()</a>
+            </div>
+        </article>
+
+        <!-- Pagination -->
+        <nav th:if="${totalPages > 1}" aria-label="分頁"
+             class="flex justify-center items-center gap-3 mt-6 text-[12px]">
+            <a th:if="${currentPage > 0}"
+               th:href="@{/feed(page=${currentPage - 1})}"
+               class="px-4 py-2 border border-[#1A4A1A] text-[#00FF41] hover:border-[#00FF41]">← prev</a>
+            <span class="text-[#2A6A2A]">
+                page <span th:text="${currentPage + 1}">1</span> / <span th:text="${totalPages}">1</span>
+            </span>
+            <a th:if="${currentPage + 1 < totalPages}"
+               th:href="@{/feed(page=${currentPage + 1})}"
+               class="px-4 py-2 border border-[#1A4A1A] text-[#00FF41] hover:border-[#00FF41]">next →</a>
+        </nav>
+    </section>
+
+    <!-- Sidebar -->
+    <aside class="w-80 bg-[#080808] border-l border-[#1A3A1A] p-6 flex flex-col gap-4">
+        <!-- Header -->
+        <div class="flex items-center gap-2 pb-3.5 border-b border-[#1A4A1A]">
+            <span class="text-[13px] font-bold text-[#00FF41]">// TOP AUTHORS</span>
+            <span class="flex-1"></span>
+            <span class="text-[11px] text-[#1A5A1A]">ls -la</span>
+        </div>
+
+        <p class="text-[10px] text-[#1A3A1A]">drwxr-xr-x   name                 articles</p>
+
+        <div th:if="${topAuthors.isEmpty()}" class="text-[11px] text-[#2A6A2A] py-2">
+            $ no authors yet
+        </div>
+
+        <a th:each="entry, iter : ${topAuthors}"
+           th:href="@{'/authors/' + ${entry.handle}}"
+           class="flex items-center gap-2 py-2.5 border-b border-[#0F1F0F] hover:opacity-90">
+            <span class="text-[10px] text-[#1A4A1A]">-rwxr--r--</span>
+            <div class="flex-1 flex flex-col gap-1">
+                <span class="text-[13px] font-bold text-[#00FF41]" th:text="${entry.name}">name</span>
+                <span class="self-start px-2 py-0.5 rounded-sm bg-[#001200] border border-[#2A6A2A] text-[10px] text-[#00CC33]"
+                      th:text="${entry.title}">title</span>
+            </div>
+            <span class="text-[12px] font-bold text-[#00FF41]"
+                  th:text="'[' + ${entry.articleCount} + ']'">[0]</span>
+        </a>
+
+        <div class="h-px bg-[#1A3A1A]"></div>
+
+        <!-- Stats -->
+        <div class="flex flex-col gap-2 pt-4">
+            <p class="text-[12px] font-bold text-[#00FF41]">// FEED_STATS</p>
+            <p class="text-[12px] text-[#2A6A2A]">&gt; total_articles:    <span th:text="${feedStats.totalArticles}">0</span></p>
+            <p class="text-[12px] text-[#2A6A2A]">&gt; authors_tracked:   <span th:text="${feedStats.authorsTracked}">0</span></p>
+            <p class="text-[12px] text-[#2A6A2A]">&gt; last_sync:         <span th:text="${feedStats.lastSync}">--:-- UTC</span></p>
+            <p class="text-[12px] font-bold text-[#00FF41]">&gt; status:            [ONLINE]</p>
+        </div>
+
+        <div class="flex-1"></div>
+
+        <a href="#" aria-disabled="true"
+           class="flex items-center justify-center h-9 rounded-sm bg-[#001200] border border-[#00FF41] text-[12px] font-bold text-[#00FF41] hover:opacity-90">
+            &gt;&gt; view_all_authors(<span th:text="${feedStats.authorsTracked}">0</span>)
+        </a>
+    </aside>
+</main>
+
+<div th:replace="~{fragments/matrix-footer :: footer}"></div>
+</body>
+</html>

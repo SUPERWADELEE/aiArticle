@@ -57,6 +57,18 @@ public final class JsonLdBuilder {
         return write(root);
     }
 
+    public static String person(String name, String jobTitle, String url) {
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("@context", "https://schema.org");
+        root.put("@type", "Person");
+        root.put("name", name);
+        if (jobTitle != null && !jobTitle.isBlank()) {
+            root.put("jobTitle", jobTitle);
+        }
+        root.put("url", url);
+        return write(root);
+    }
+
     public static String collectionPage(String name, String description, String url) {
         Map<String, Object> root = new LinkedHashMap<>();
         root.put("@context", "https://schema.org");

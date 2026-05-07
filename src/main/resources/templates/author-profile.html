@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/matrix-base :: head}"></head>
+<body class="bg-[#0D0D0D] text-[#00FF41]">
+<div th:replace="~{fragments/matrix-header :: header}"></div>
+
+<!-- Author Hero -->
+<section class="bg-[#060606] border-b border-[#1A3A1A] px-10 py-8 flex items-center gap-12"
+         style="font-family:'Space Mono',monospace;">
+
+    <!-- Avatar (static decoration) -->
+    <div class="w-[220px] h-[220px] rounded bg-[#0A0A0A] border border-[#1F5C1F] flex flex-col items-center justify-center gap-1 flex-shrink-0">
+        <p class="text-[9px] text-[#00FF41] tracking-wider">ﾊﾐﾋｰｳｼ ﾉﾌﾔｹﾒｶｷ</p>
+        <p class="text-[9px] text-[#00CC33] tracking-wider">ｺｿﾁﾔｻｴｽﾩ ﾃｼﾀｵﾎ</p>
+        <p class="text-[9px] text-[#008822] tracking-wider">ﾐｶｻﾔﾒ ｷﾋｴｹﾊﾌｰ</p>
+        <p class="text-[9px] text-[#005511] tracking-wider">01100111 00101010</p>
+        <p class="text-[9px] text-[#00FF41] tracking-wider">{ author: 'human' }</p>
+        <p class="text-[9px] text-[#00CC33] tracking-wider">10101010 11110000</p>
+        <p class="text-[9px] text-[#00FF41] tracking-wider">init(author.profile)</p>
+        <p class="text-[9px] text-[#007A1A] tracking-wider">01110001 10100110</p>
+        <p class="text-[9px] text-[#00FF41] tracking-wider matrix-cursor">&gt;&gt; LOADING...</p>
+    </div>
+
+    <!-- Author Info -->
+    <div class="flex-1 flex flex-col gap-3.5">
+        <p class="text-[12px] text-[#3A8A3A]" th:text="${authorPath}">~/authors/handle</p>
+        <h1 class="text-[36px] font-bold text-[#00FF41] tracking-wide matrix-glow"
+            th:text="${author.name}">Author Name</h1>
+        <div class="self-start flex items-center gap-2 px-3 h-7 rounded bg-[#0A2A0A] border border-[#00FF41]">
+            <span class="text-[12px] text-[#00FF41]">//</span>
+            <span class="text-[12px] text-[#00FF41]" th:text="${author.title}">Title</span>
+        </div>
+        <pre class="text-[12px] text-[#3A8A3A] leading-relaxed whitespace-pre-wrap"
+             style="font-family:'Space Mono',monospace;"
+             th:text="'$ cat bio.txt&#10;' + ${author.name} + ' 是 ' + ${author.title} + '。'">$ cat bio.txt
+bio</pre>
+
+        <!-- Stats -->
+        <div class="flex items-center gap-8 mt-2">
+            <div class="flex flex-col gap-0.5">
+                <span class="text-[22px] font-bold text-[#00FF41]" th:text="${authorArticles.size()}">0</span>
+                <span class="text-[11px] text-[#3A6B3A]">articles</span>
+            </div>
+            <div class="flex flex-col gap-0.5">
+                <span class="text-[22px] font-bold text-[#00FF41]" th:text="${articlesThisMonth}">0</span>
+                <span class="text-[11px] text-[#3A6B3A]">this_month</span>
+            </div>
+            <div class="flex flex-col gap-0.5">
+                <span class="text-[22px] font-bold text-[#00FF41]">12</span>
+                <span class="text-[11px] text-[#3A6B3A]">topics</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Right (static) -->
+    <div class="w-[200px] flex flex-col items-end justify-center gap-3">
+        <a href="#" aria-disabled="true"
+           class="flex items-center justify-center px-5 h-10 rounded bg-[#00FF41] text-[#0D0D0D] text-[12px] font-bold">
+            ./follow --author
+        </a>
+        <span class="text-[11px] text-[#2A5A2A]">last_active: 2h ago</span>
+        <div class="flex flex-col items-end gap-1">
+            <span class="text-[10px] text-[#1A4A1A]">━━━━━━━━━━━━━━━━</span>
+            <span class="text-[10px] text-[#1A4A1A]">━━━━━━━━━━━━</span>
+            <span class="text-[10px] text-[#1A4A1A]">━━━━━━━━</span>
+        </div>
+    </div>
+</section>
+
+<!-- Body -->
+<main class="flex gap-8 px-10 py-8" style="font-family:'Space Mono',monospace;">
+
+    <!-- Left: tabs + activity feed -->
+    <div class="flex-1 flex flex-col gap-5">
+
+        <!-- Tab bar -->
+        <div class="flex border-b border-[#1A3A1A]">
+            <div class="h-10 px-5 flex items-center bg-[#0D0D0D] border-b-2 border-[#00FF41]">
+                <span class="text-[12px] text-[#00FF41]">activity.log</span>
+            </div>
+            <div class="h-10 px-5 flex items-center">
+                <span class="text-[12px] text-[#3A6B3A]">articles[]</span>
+            </div>
+            <div class="h-10 px-5 flex items-center">
+                <span class="text-[12px] text-[#3A6B3A]">about.md</span>
+            </div>
+        </div>
+
+        <!-- Activity Feed -->
+        <div class="rounded bg-[#080808] border border-[#1A3A1A] flex flex-col">
+            <!-- Terminal header -->
+            <div class="h-9 px-4 flex items-center gap-2 bg-[#111111] border-b border-[#1A3A1A] rounded-t">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#FF5F57]"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#28CA41]"></span>
+                <span class="ml-2 text-[11px] text-[#3A8A3A]"
+                      th:text="${author.handle} + '@ai-feed: ~/activity'">handle@ai-feed: ~/activity</span>
+            </div>
+
+            <!-- Entries -->
+            <div class="p-5 flex flex-col gap-1">
+                <p class="text-[11px] text-[#00FF41]"
+                   th:text="'$ tail -f activity.log | grep --author=' + '''' + ${author.handle} + ''''">$ tail -f activity.log | grep --author='handle'</p>
+                <p class="text-[10px] text-[#1A3A1A]">──────────────────────────────────────────────────────</p>
+
+                <p th:if="${authorArticles.isEmpty()}"
+                   class="text-[12px] text-[#2A6A2A] py-3">[ no entries yet ]</p>
+
+                <div th:each="article, iter : ${authorArticles}"
+                     th:if="${iter.index < 5}"
+                     class="py-3 border-b border-[#111111] flex flex-col gap-1.5">
+                    <div class="flex items-center gap-3 text-[10px] text-[#2A5A2A]">
+                        <time th:if="${article.publishedAt}"
+                              th:datetime="${article.publishedAt}"
+                              th:text="${#temporals.format(article.publishedAt, 'yyyy-MM-dd HH:mm')} + ' UTC'">date</time>
+                        <span>•</span>
+                        <span th:text="${@sourceNameMapper.display(article.source)}">source</span>
+                    </div>
+                    <h3 class="text-[13px] font-bold text-[#00FF41] leading-snug">
+                        <a th:href="@{'/articles/' + ${article.id}}"
+                           th:text="${article.title}"
+                           class="hover:underline">title</a>
+                    </h3>
+                    <p class="text-[10px] text-[#2A5A2A]"
+                       th:text="'&gt;&gt; src: ' + ${article.source} + '  |  read_time: 8min  |  views: --'">meta</p>
+                </div>
+
+                <a th:if="${!authorArticles.isEmpty()}"
+                   href="/feed"
+                   class="text-center py-4 text-[11px] text-[#2A6A2A] hover:text-[#00FF41]">[ press ENTER to load more entries... ]</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Sidebar -->
+    <aside class="w-80 flex flex-col gap-5">
+
+        <!-- Code Rain (static) -->
+        <div class="rounded bg-[#060606] border border-[#1A3A1A] p-4 flex flex-col gap-1">
+            <p class="text-[10px] text-[#2A6A2A]">// matrix.stream()</p>
+            <p class="text-[11px] text-[#00FF41] tracking-widest">ﾊﾐﾋｰｳｼ ﾉﾌﾔｹﾒｶｷ</p>
+            <p class="text-[11px] text-[#00CC33] tracking-widest">ｺｿﾁﾔｻｴｽﾩ ﾃｼﾀｵﾎ</p>
+            <p class="text-[11px] text-[#008822] tracking-widest">ﾐｶｻﾔﾒ ｷﾋｴｹﾊﾌｰ</p>
+            <p class="text-[10px] text-[#005511] tracking-wider">01100111 00101010</p>
+            <p class="text-[11px] text-[#003308] tracking-widest">ﾊﾐ ｸｷｻﾓｾﾅ ﾔｹﾒ</p>
+        </div>
+
+        <!-- Topics (static) -->
+        <div class="rounded bg-[#080808] border border-[#1A3A1A] p-4 flex flex-col gap-3">
+            <p class="text-[11px] text-[#00FF41]">$ ls ./topics</p>
+            <div class="flex flex-wrap gap-2">
+                <span class="px-2.5 h-6 flex items-center rounded bg-[#0A1A0A] border border-[#1A4A1A] text-[11px] text-[#3A7A3A]">#ai</span>
+                <span class="px-2.5 h-6 flex items-center rounded bg-[#0A1A0A] border border-[#1A4A1A] text-[11px] text-[#3A7A3A]">#llm</span>
+                <span class="px-2.5 h-6 flex items-center rounded bg-[#0A1A0A] border border-[#1A4A1A] text-[11px] text-[#3A7A3A]">#research</span>
+                <span class="px-2.5 h-6 flex items-center rounded bg-[#0A1A0A] border border-[#1A4A1A] text-[11px] text-[#3A7A3A]">#agents</span>
+                <span class="px-2.5 h-6 flex items-center rounded bg-[#0A1A0A] border border-[#1A4A1A] text-[11px] text-[#3A7A3A]">#policy</span>
+            </div>
+        </div>
+
+        <!-- Related Authors -->
+        <div class="rounded bg-[#080808] border border-[#1A3A1A] p-4 flex flex-col gap-3">
+            <p class="text-[11px] text-[#00FF41]">$ ls ./related_authors</p>
+            <p th:if="${relatedAuthors.isEmpty()}" class="text-[11px] text-[#2A6A2A]">[ none ]</p>
+            <a th:each="other, iter : ${relatedAuthors}"
+               th:href="@{'/authors/' + ${#strings.toLowerCase(other.handle)}}"
+               class="flex items-center gap-3 pb-2.5 border-b border-[#111111] hover:opacity-90">
+                <div class="w-9 h-9 flex items-center justify-center rounded bg-[#0A1A0A] border border-[#1A4A1A] text-[12px] text-[#00FF41]"
+                     th:text="${#strings.substring(other.name, 0, 1)}">A</div>
+                <div class="flex-1 flex flex-col gap-0.5">
+                    <span class="text-[12px] font-bold text-[#00FF41]" th:text="${other.name}">Name</span>
+                    <span class="text-[10px] text-[#3A6B3A]" th:text="${other.title}">Title</span>
+                </div>
+                <span class="text-[11px] text-[#2A6A2A]">→</span>
+            </a>
+        </div>
+    </aside>
+</main>
+
+<div th:replace="~{fragments/matrix-footer :: footer}"></div>
+</body>
+</html>

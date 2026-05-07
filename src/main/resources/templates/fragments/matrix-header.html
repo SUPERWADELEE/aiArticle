@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="header"
+        class="bg-[#0A0A0A] border-b border-[#00FF41]/60 sticky top-0 z-10">
+    <div class="h-16 px-8 flex items-center gap-8">
+        <a href="/feed" class="flex items-center gap-2 text-[#00FF41] font-bold hover:opacity-90"
+           style="font-family:'Courier Prime','Courier New',monospace;font-size:22px;">
+            <span>&gt; AI_FEED</span>
+            <span class="inline-block w-3 h-5 bg-[#00FF41] matrix-cursor"></span>
+        </a>
+        <nav aria-label="主導覽" class="flex items-center gap-7 ml-auto"
+             style="font-family:'Courier Prime','Courier New',monospace;font-size:13px;">
+            <a href="/" class="text-[#00FF41] font-bold hover:opacity-90">--explore</a>
+            <a href="/feed" class="text-[#3A7A3A] hover:text-[#00FF41]">--authors</a>
+            <a href="#" aria-disabled="true" class="text-[#3A7A3A] opacity-70">--topics</a>
+            <a href="#" aria-disabled="true" class="text-[#3A7A3A] opacity-70">--bookmarks</a>
+        </nav>
+        <div class="pl-8 flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-sm bg-[#001200] border border-[#00FF41] text-[11px] text-[#00FF41]"
+                  style="font-family:'Space Mono',monospace;">
+                <span class="inline-block w-2 h-2 rounded-full bg-[#00FF41] matrix-cursor"></span>
+                LIVE
+            </span>
+        </div>
+    </div>
+</header>
+</body>
+</html>

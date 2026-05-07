@@ -1,47 +1,81 @@
 <!DOCTYPE html>
 <html lang="zh-Hant" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout/base :: head}"></head>
-<body class="bg-slate-50 text-slate-900">
-<div th:replace="~{fragments/header :: header}"></div>
+<head th:replace="~{layout/matrix-base :: head}"></head>
+<body class="bg-[#0D0D0D] text-[#00FF41]">
+<div th:replace="~{fragments/matrix-header :: header}"></div>
 
-<main class="max-w-3xl mx-auto px-4 py-8">
-    <article>
-        <header class="mb-6">
-            <div class="flex items-center gap-2 text-sm text-slate-500 mb-3">
-                <a th:href="@{/sources/{src}(src=${article.source})}"
-                   class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded hover:bg-indigo-100"
-                   th:text="${@sourceNameMapper.display(article.source)}">source</a>
-                <time th:if="${article.publishedAt}"
-                      th:datetime="${article.publishedAt}"
-                      th:text="${#temporals.format(article.publishedAt, 'yyyy-MM-dd HH:mm')}">date</time>
+<main class="max-w-3xl mx-auto px-6 py-10 flex flex-col gap-6"
+      style="font-family:'Space Mono',monospace;">
+
+    <article class="flex flex-col gap-5">
+
+        <!-- Path label -->
+        <p class="text-[12px] text-[#3A8A3A]"
+           th:text="'~/articles/' + ${article.id} + '/' + ${slug}">~/articles/0/slug</p>
+
+        <!-- Meta row -->
+        <div class="flex items-center gap-3">
+            <a th:href="@{/sources/{src}(src=${article.source})}"
+               class="px-2 py-0.5 rounded-sm bg-[#001200] border border-[#00FF41] text-[11px] font-bold text-[#00FF41] hover:opacity-90"
+               th:text="'[' + ${#strings.toUpperCase(@sourceNameMapper.display(article.source))} + ']'">[SOURCE]</a>
+            <time th:if="${article.publishedAt}"
+                  th:datetime="${article.publishedAt}"
+                  class="text-[11px] text-[#1A5A1A]"
+                  th:text="${#temporals.format(article.publishedAt, 'yyyy-MM-dd  HH:mm')} + ' UTC'">2026-04-21  08:32 UTC</time>
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-[28px] sm:text-[32px] font-bold text-[#00FF41] leading-tight matrix-glow"
+            th:text="${article.title}">Article Title</h1>
+
+        <!-- Author line -->
+        <p class="text-[13px] text-[#3A8A3A]">
+            <span>// by&nbsp;</span>
+            <a th:if="${authorHandle != null}"
+               th:href="@{'/authors/' + ${authorHandle}}"
+               class="text-[#00CC33] hover:text-[#00FF41] underline decoration-[#1A4A1A] hover:decoration-[#00FF41]"
+               th:text="${authorDisplay}">Author</a>
+            <span th:if="${authorHandle == null}"
+                  class="text-[#00CC33]"
+                  th:text="${authorDisplay}">Author</span>
+        </p>
+
+        <!-- Summary terminal block -->
+        <section aria-label="中文摘要"
+                 class="rounded bg-[#080808] border border-[#1A3A1A] flex flex-col">
+
+            <div class="h-9 px-4 flex items-center gap-2 bg-[#111111] border-b border-[#1A3A1A] rounded-t">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#FF5F57]"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#28CA41]"></span>
+                <span class="ml-2 text-[11px] text-[#3A8A3A]"
+                      th:text="${article.id} + '@ai-feed: ~/summary'">id@ai-feed: ~/summary</span>
             </div>
-            <h1 class="text-3xl font-bold leading-tight mb-2" th:text="${article.title}">Title</h1>
-            <p class="text-base text-slate-600">
-                by <span class="font-semibold text-slate-900"
-                         th:text="${@authorLookup.displayWithTitle(article)}">作者</span>
-            </p>
-        </header>
 
-        <section aria-label="中文摘要" class="prose prose-slate max-w-none mb-8">
-            <h2 class="text-xl font-semibold mb-3">中文摘要</h2>
-            <p class="whitespace-pre-line text-slate-800 leading-relaxed"
-               th:text="${article.summary}">summary</p>
+            <div class="p-6 flex flex-col gap-3">
+                <p class="text-[12px] text-[#00FF41]">$ cat summary.md</p>
+                <p class="text-[10px] text-[#1A3A1A]">──────────────────────────────────────────────────────</p>
+                <p class="whitespace-pre-line text-[14px] text-[#3A8A3A] leading-relaxed"
+                   th:text="${article.summary}">summary content</p>
+            </div>
         </section>
 
-
-        <footer class="border-t border-slate-200 pt-6">
+        <!-- Open original source button -->
+        <footer class="pt-4 border-t border-[#1A3A1A]">
             <a th:href="${article.url}" target="_blank" rel="noopener"
-               class="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium">
-                閱讀原文 →
+               class="inline-flex items-center gap-2 px-5 h-10 rounded bg-[#001200] border border-[#00FF41] text-[12px] font-bold text-[#00FF41] hover:opacity-90">
+                <span>&gt;&gt;</span>
+                <span>open_source(<span th:text="${article.url}">url</span>)</span>
             </a>
         </footer>
     </article>
 
-    <nav aria-label="返回" class="mt-8">
-        <a href="/" class="text-sm text-slate-600 hover:text-indigo-600">← 回到文章列表</a>
+    <!-- Back link -->
+    <nav aria-label="返回" class="pt-2">
+        <a href="/" class="text-[12px] text-[#2A6A2A] hover:text-[#00FF41]">&lt;- cd ..</a>
     </nav>
 </main>
 
-<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/matrix-footer :: footer}"></div>
 </body>
 </html>

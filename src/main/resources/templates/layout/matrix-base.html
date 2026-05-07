@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow">
+
+    <title th:text="${pageTitle}">AI_FEED</title>
+    <meta name="description" th:content="${pageDescription}">
+
+    <link rel="canonical" th:href="${siteUrl + canonicalPath}">
+
+    <meta property="og:site_name" th:content="${siteName}">
+    <meta property="og:type" th:content="${ogType ?: 'website'}">
+    <meta property="og:title" th:content="${pageTitle}">
+    <meta property="og:description" th:content="${pageDescription}">
+    <meta property="og:url" th:content="${siteUrl + canonicalPath}">
+    <meta property="og:locale" content="zh_TW">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" th:content="${pageTitle}">
+    <meta name="twitter:description" th:content="${pageDescription}">
+
+    <link rel="alternate" type="application/atom+xml" th:title="${siteName}"
+          th:href="${siteUrl + '/feed.xml'}">
+
+    <script th:if="${jsonLd}" type="application/ld+json" th:utext="${jsonLd}"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Courier+Prime:wght@400;700&display=swap"
+          rel="stylesheet">
+    <style>
+        body {
+            background: #0D0D0D;
+            color: #00FF41;
+            font-family: 'Space Mono', 'Courier Prime', 'Courier New', monospace;
+        }
+        .matrix-glow { text-shadow: 0 0 6px rgba(0, 255, 65, 0.55); }
+        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        @keyframes matrixCursorBlink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+        .matrix-cursor { animation: matrixCursorBlink 1s steps(1) infinite; }
+        a[aria-disabled="true"] { cursor: default; }
+
+        /* ---- Particle page transition (sand disperse / reassemble) ---- */
+        .mp {
+            display: inline-block;
+            will-change: transform, opacity, filter;
+            transform-origin: 50% 50%;
+        }
+        body.matrix-leaving .mp {
+            animation: mpLeave var(--leave-ms, 850ms) cubic-bezier(.55, .05, .8, .25) forwards;
+            animation-delay: var(--ddelay, 0ms);
+        }
+        @keyframes mpLeave {
+            0%   { transform: translate(0,0) rotate(0); opacity: 1; filter: brightness(1); }
+            18%  { filter: brightness(1.5) drop-shadow(0 0 4px rgba(0,255,65,0.7)); }
+            100% { transform: translate(var(--dx,0), var(--dy,0)) rotate(var(--dr,0)) scale(0.4); opacity: 0; filter: brightness(0.3); }
+        }
+        body.matrix-entering .mp {
+            animation: mpEnter var(--enter-ms, 850ms) cubic-bezier(.16, 1, .3, 1) forwards;
+            animation-delay: var(--ddelay, 0ms);
+            opacity: 0;
+        }
+        @keyframes mpEnter {
+            0%   { transform: translate(var(--dx,0), var(--dy,0)) rotate(var(--dr,0)) scale(0.4); opacity: 0; filter: brightness(0.3); }
+            40%  { opacity: 0.6; filter: brightness(1.5) drop-shadow(0 0 5px rgba(0,255,65,0.6)); }
+            100% { transform: translate(0,0) rotate(0) scale(1); opacity: 1; filter: brightness(1); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            body.matrix-leaving .mp,
+            body.matrix-entering .mp { animation: none !important; opacity: 1 !important; transform: none !important; }
+        }
+    </style>
+    <script>
+        (function () {
+            const LEAVE_MS = 850;
+            const ENTER_MS = 850;
+            const MAX_PARTICLES = 1800;
+            const SKIP_TAGS = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, IFRAME: 1, SVG: 1, CANVAS: 1, IMG: 1 };
+            const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            let leaving = false;
+
+            function rng(a, b) { return Math.random() * (b - a) + a; }
+
+            function shouldSkip(el) {
+                if (!el || el.nodeType !== 1) return true;
+                if (SKIP_TAGS[el.tagName]) return true;
+                if (el.classList && (el.classList.contains('no-particles') || el.classList.contains('matrix-cursor'))) return true;
+                return false;
+            }
+
+            function splitChars(direction) {
+                const root = document.body;
+                const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+                    acceptNode(n) {
+                        if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+                        let p = n.parentElement;
+                        while (p) {
+                            if (shouldSkip(p)) return NodeFilter.FILTER_REJECT;
+                            p = p.parentElement;
+                        }
+                        const rect = n.parentElement.getBoundingClientRect();
+                        if (rect.bottom < -150 || rect.top > window.innerHeight + 250) return NodeFilter.FILTER_REJECT;
+                        return NodeFilter.FILTER_ACCEPT;
+                    }
+                });
+                const targets = [];
+                let n;
+                while ((n = walker.nextNode())) targets.push(n);
+
+                const vw = window.innerWidth;
+                const vh = window.innerHeight;
+                let count = 0;
+
+                for (const node of targets) {
+                    if (count >= MAX_PARTICLES) break;
+                    const text = node.nodeValue;
+                    const frag = document.createDocumentFragment();
+                    for (let i = 0; i < text.length; i++) {
+                        const ch = text[i];
+                        if (ch === '\n' || ch === '\r' || ch === '\t' || ch === ' ') {
+                            frag.appendChild(document.createTextNode(ch));
+                            continue;
+                        }
+                        const span = document.createElement('span');
+                        span.className = 'mp';
+                        span.textContent = ch;
+                        // Random destination vector — bias downward like falling sand
+                        const angle = rng(-Math.PI, Math.PI);
+                        const radial = rng(80, Math.max(vw, vh) * 0.6);
+                        const dx = Math.cos(angle) * radial;
+                        const dy = Math.sin(angle) * radial * 0.6 + rng(60, 220); // gravity bias
+                        span.style.setProperty('--dx', dx.toFixed(0) + 'px');
+                        span.style.setProperty('--dy', dy.toFixed(0) + 'px');
+                        span.style.setProperty('--dr', rng(-540, 540).toFixed(0) + 'deg');
+                        // stagger by both random and char index — looks like wind sweeping
+                        span.style.setProperty('--ddelay', (rng(0, 280) + i * 4).toFixed(0) + 'ms');
+                        frag.appendChild(span);
+                        count++;
+                        if (count >= MAX_PARTICLES) break;
+                    }
+                    if (node.parentNode) node.parentNode.replaceChild(frag, node);
+                }
+                return count;
+            }
+
+            function isInternalNav(a, e) {
+                if (e.defaultPrevented || e.button !== 0) return false;
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false;
+                if (!a || !a.href) return false;
+                if (a.target && a.target !== '_self') return false;
+                if (a.hasAttribute('download')) return false;
+                if (a.getAttribute('aria-disabled') === 'true') return false;
+                if (a.hasAttribute('data-no-transition')) return false;
+                let url;
+                try { url = new URL(a.href, location.href); } catch (_) { return false; }
+                if (url.origin !== location.origin) return false;
+                if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+                if (url.pathname === location.pathname && url.search === location.search && url.hash) return false;
+                return true;
+            }
+
+            function runEnter() {
+                if (reducedMotion) return;
+                splitChars('in');
+                document.body.classList.remove('matrix-leaving');
+                document.body.classList.add('matrix-entering');
+                setTimeout(function () {
+                    document.body.classList.remove('matrix-entering');
+                }, ENTER_MS + 350);
+            }
+
+            function runLeave(href) {
+                if (reducedMotion) { window.location.href = href; return; }
+                if (leaving) return;
+                leaving = true;
+                splitChars('out');
+                document.body.classList.remove('matrix-entering');
+                document.body.classList.add('matrix-leaving');
+                setTimeout(function () { window.location.href = href; }, LEAVE_MS + 200);
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                requestAnimationFrame(runEnter);
+            });
+
+            document.addEventListener('click', function (e) {
+                const a = e.target && e.target.closest ? e.target.closest('a') : null;
+                if (!isInternalNav(a, e)) return;
+                e.preventDefault();
+                runLeave(a.href);
+            });
+
+            window.addEventListener('pageshow', function (e) {
+                if (e.persisted) {
+                    leaving = false;
+                    document.body.classList.remove('matrix-leaving');
+                    runEnter();
+                }
+            });
+        })();
+    </script>
+</head>
+<body>
+</body>
+</html>

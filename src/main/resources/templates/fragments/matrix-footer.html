@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="footer"
+        class="bg-[#050505] border-t border-[#1A3A1A] h-10 px-8 flex items-center text-[11px]"
+        style="font-family:'Space Mono',monospace;">
+    <span class="text-[#1A4A1A]">[SYS] AI_FEED v2.4.1 · RUNNING · PID:8847 · MEM:2.3GB · CPU:12%</span>
+    <span class="flex-1"></span>
+    <time class="text-[#1A4A1A]"
+          th:datetime="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd''T''HH:mm:ssXXX')}"
+          th:text="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd HH:mm:ss')} + ' UTC'">2026-04-21 08:47:33 UTC</time>
+</footer>
+</body>
+</html>

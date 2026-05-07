@@ -5,8 +5,10 @@ import com.example.aidigest.model.Article;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component("authorLookup")
@@ -49,6 +51,22 @@ public class AuthorLookupService {
             if (lower.contains(e.getKey())) return Optional.of(e.getValue());
         }
         return Optional.empty();
+    }
+
+    public Optional<AuthorTrackerProperties.Handle> findByHandle(String handle) {
+        if (handle == null || handle.isBlank()) return Optional.empty();
+        return Optional.ofNullable(byHandle.get(handle.toLowerCase(Locale.ROOT)));
+    }
+
+    public List<Article> articlesFor(AuthorTrackerProperties.Handle target, List<Article> all) {
+        if (target == null || all == null || all.isEmpty()) return List.of();
+        String wantHandle = target.handle().toLowerCase(Locale.ROOT);
+        return all.stream()
+                .filter(Objects::nonNull)
+                .filter(a -> find(a)
+                        .map(h -> h.handle().toLowerCase(Locale.ROOT).equals(wantHandle))
+                        .orElse(false))
+                .toList();
     }
 
     public String displayWithTitle(Article article) {
